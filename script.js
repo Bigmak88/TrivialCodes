@@ -4,6 +4,7 @@ const skipButton = document.getElementById('skip-btn');
 const questionEl = document.getElementById("question");
 const scoreEl = document.getElementById("score");
 const answerEl = document.getElementsByClassName('choice-text');
+const topScoresEl = document.getElementsByClassName('scoreBoard');
 
 
 
@@ -132,32 +133,40 @@ let questions = [
 }
 ];
 
-// Function that starts the game
+// Event Listeners for Start and Skip Buttons
 startButton.addEventListener('click', startGame);
 skipButton.addEventListener('click', () => {
     currentQuestionIndex++
     getNextQuestion()
 });
 
-function startGame() {
+// Start Game Function
+    function startGame() {
     console.log('started');
     startButton.classList.add('hide');
     shuffledQuestions = questions.sort(() => Math.random() - 0.5)
     currentQuestionIndex = 0;
     questionEl.classList.remove('hide');
-    setInterval(function() {
+
+    var x = setInterval(function() {
         timer -= 1;
         document.getElementById('timer').innerText = timer;
-    // display time on screen
+
     // check if timer is 0
-        if (timer === 0) {
+    if (timer <= 0) { 
+        clearInterval(x);
+        gameOver();            
+    } 
+
     // stop the quiz
-        }
+        
     }, 1000);
 
     getNextQuestion();
     
 }
+
+// Next Question Function
 
 function getNextQuestion() {
     resetState();
@@ -167,6 +176,7 @@ function getNextQuestion() {
 }
 
 
+// Display Questions
 
 function showQuestions(question) {
     console.log(question);
@@ -182,6 +192,8 @@ function showQuestions(question) {
         answerEl[index].appendChild(button);
     })
 }
+
+// Reset Element
 
 function resetState() {
     skipButton.classList.add('hide')
@@ -201,6 +213,7 @@ function selectAnswer(e) {
     } else {
         score ++;
     }
+    scoreEl.textContent= "score = " + score;
 
     currentQuestionIndex += 1;
     getNextQuestion();
@@ -214,21 +227,35 @@ function setStatusClass(element, correct) {
        } else {
            element.classList.add('wrong')
        }
-}
+};
 
-function displayHighScores() {
-    var scores = JSON.parse(localStorage.getItem('scores')) || [];
-    scores.push(scoreEl);
-    localStorage.setItem('scores', JSON.stringify(scores));
-}
+function getScores(user) {
+    var userScore = {intial: user, result: score};
+    var tempArr = [];
+     if (localStorage.getItem('scores')) {
+    tempArr = JSON.parse(localStorage.getItem("scores"));
+     tempArr.push(userScore);
+        localStorage.setItem("scores", JSON.stringify(tempArr));
+            } else {
+                tempArr.push(userScore);
+                localStorage.setItem("scores", JSON.stringify(tempArr));
+            }
+           // console.log(tempArr)
+    
+};
+
 function clearStatusClass(element) {
     element.classList.remove('correct')
     element.classList.remove('wrong')
-}
-
-
-
-//Function to refresh questions
+};
 
 
 //End of game
+
+function gameOver() {
+    alert("Game Over!!");
+    let promptUser = prompt('Enter Name To Save Your Score!')
+
+    getScores(promptUser);
+}
+
